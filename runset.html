@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>asm.js</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link href="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css" rel="stylesheet">
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="http://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div class="container">
+  <div class="row">
+    <div class="span12"><center><h1>brainfuck compiled to Javascript</h1></center></div>
+    <div class="span6">
+      <textarea style="width: 98%" placeholder="input" id="input"></textarea>
+    </div>
+    <div class="span6">
+      <div id="modules" class="btn-toolbar"></div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="span12">
+      <pre style="min-height: 400px;" id="output"></pre>
+    </div>
+  </div>
+</div>
+<script src="bf.js"></script>
+<script>
+var BFinputPtr = 0;
+var BFinputText = '';
+
+var BFoutputText = ''; // Lines of text to be output with printf "%s\n"
+var BFoutputChar = ''; // Save the '\n' for when we're joining lines.
+var BFoutputLine = ''; // Characters on this line, the official prompt.
+
+var BFreset = 1;
+
+$.each(window, function (item) {
+  if (item.substr(0, 2) == "BF" && (typeof eval(item)) === "object") {
+    var $btn = $("<button class='btn btn-primary'>Run " + item + "</button>");
+    $("#modules").append($btn);
+    $btn.click(function () {
+      inputPtr = 0;
+      $("#output").empty();
+      if (BFreset) {
+	  eval(item + ".reset()");
+	  BFreset = 0;
+      }
+      BFinputText = document.getElementById("input").value;
+      BFinputPtr = 0;
+      if (BFinputText != '' && BFinputText.slice(-1) != '\n') 
+	BFinputText += '\n';
+
+      document.getElementById("input").value = "";
+
+      BFoutputLine += BFinputText;
+
+      if (eval(item + ".run()") < 0)
+	BFreset = 1;
+      document.getElementById("output").innerHTML  = BFoutputText + BFoutputChar + BFoutputLine;
+      BFoutputText = BFoutputChar = '';
+    });
+  }
+});
+</script>
+</body>
+</html>

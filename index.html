@@ -1,0 +1,84 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Brainfuck asm.js JQuery Terminal Emulator</title>
+    <meta name="author" content="Jakub Jankiewicz - jcubic&#64;onet.pl"/>
+    <script src="js/jquery-1.7.1.min.js"></script>
+    <script src="js/jquery.mousewheel-min.js"></script>
+    <script src="js/jquery.terminal-min.js"></script>
+    <script src="bf.js"></script>
+    <link href="css/jquery.terminal.css" rel="stylesheet"/>
+  </head>
+<body>
+<script>//<!--
+var BFinputPtr = 0;
+var BFinputText = '';
+
+var BFoutputText = ''; // Lines of text to be output with printf "%s\n"
+var BFoutputChar = ''; // Save the '\n' for when we're joining lines.
+var BFoutputLine = ''; // Characters on this line, the official prompt.
+// Need the last two to reverse the bad effects of the input and echo functions.
+
+jQuery(document).ready(function($) {
+    var do_clear = 0;
+    $('body').terminal(function(command, term) {
+
+	if (do_clear) {
+	    do_clear = 0;
+	    term.clear();
+	}
+
+	BFinputPtr = 0;
+	BFinputText = command + String.fromCharCode(10);
+
+	if (BFprogram.run() < 0)
+	    do_clear = 1;
+
+	term.echo (BFoutputText);
+	BFoutputText = "";
+
+	    if (do_clear) {
+		if (BFoutputLine != "") term.echo(BFoutputLine);
+		BFoutputLine = 'Press return to restart:';
+	    }
+
+	term.set_prompt(BFoutputLine);
+	BFoutputText = BFoutputLine = BFoutputChar = '';
+
+    }, {
+        greetings: '',
+        onBlur: function() {
+            // prevent losing focus
+            return false;
+        },
+	clear: false,
+	exit: false,
+	prompt: '',
+	onInit: function(term) {
+	    BFinputText = '';
+	    BFoutputText = BFoutputLine = BFoutputChar = '';
+
+	    try {
+		BFprogram.reset();
+		if (BFprogram.run() < 0)
+		    do_clear = 1;
+	    } catch (error) {
+		term.echo('ERROR: ' + error.message);
+	    }
+
+	    term.echo (BFoutputText);
+	    BFoutputText = '';
+
+	    if (do_clear) {
+		if (BFoutputLine != "") term.echo(BFoutputLine);
+		BFoutputLine = 'Press return to restart:';
+	    }
+
+	    term.set_prompt(BFoutputLine);
+	    BFoutputText = BFoutputLine = BFoutputChar = '';
+	}
+    });
+});
+//--></script>
+</body>
