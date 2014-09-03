@@ -1,16 +1,14 @@
 <!DOCTYPE HTML>
 <html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta charset="utf-8" />
-    <title>Brainfuck asm.js JQuery Terminal Emulator</title>
-    <meta name="author" content="Jakub Jankiewicz - jcubic&#64;onet.pl"/>
-    <script src="js/jquery-1.7.1.min.js"></script>
-    <script src="js/jquery.mousewheel-min.js"></script>
-    <script src="js/jquery.terminal-min.js"></script>
-    <script src="bf.js"></script>
-    <link href="css/jquery.terminal.css" rel="stylesheet"/>
-  </head>
-<body>
+<head>
+<meta charset="utf-8" />
+<title>Brainfuck asm.js JQuery Terminal Emulator</title>
+<meta name="author" content="Jakub Jankiewicz - jcubic&#64;onet.pl"/>
+<script src="js/jquery-1.7.1.min.js"></script>
+<script src="js/jquery.mousewheel-min.js"></script>
+<script src="js/jquery.terminal-min.js"></script>
+<script src="bf.js"></script>
+<link href="css/jquery.terminal.css" rel="stylesheet"/>
 <script>//<!--
 var BFinputPtr = 0;
 var BFinputText = '';
@@ -58,6 +56,7 @@ jQuery(document).ready(function($) {
 	onInit: function(term) {
 	    BFinputText = '';
 	    BFoutputText = BFoutputLine = BFoutputChar = '';
+	    $("#bare").remove();
 
 	    try {
 		BFprogram.reset();
@@ -81,4 +80,13 @@ jQuery(document).ready(function($) {
     });
 });
 //--></script>
+</head>
+
+<body class="terminal">
+<div id="bare" class="terminal-output">
+<div>BF Interpreter ...</div>
+<div></div>
+<div></div>
+<div>Please enable Javascript and cookies.</div>
+</div>
 </body>
