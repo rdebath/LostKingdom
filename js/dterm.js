@@ -1,58 +1,105 @@
-/*!
+/**@license
+ *       __ _____                     ________                              __
+ *      / // _  /__ __ _____ ___ __ _/__  ___/__ ___ ______ __ __  __ ___  / /
+ *  __ / // // // // // _  // _// // / / // _  // _//     // //  \/ // _ \/ /
+ * /  / // // // // // ___// / / // / / // ___// / / / / // // /\  // // / /__
+ * \___//____ \\___//____//_/ _\_  / /_//____//_/ /_/ /_//_//_/ /_/ \__\_\___/
+ *           \/              /____/
  * Example plugin using JQuery Terminal Emulator
- * Copyright (C) 2010 Jakub Jankiewicz <http://jcubic.pl> 
+ * Copyright (c) 2014-2019 Jakub Jankiewicz <https://jcubic.pl/me>
+ * Released under the MIT license
  *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU Lesser General Public License for more details.
- * 
- * You should have received a copy of the GNU Lesser General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-(function($) {
+/* global setTimeout, IntersectionObserver, define, global, require, module */
+(function(factory, undefined) {
+    var root = typeof window !== 'undefined' ? window : global;
+    if (typeof define === 'function' && define.amd) {
+        // AMD. Register as an anonymous module.
+        // istanbul ignore next
+        define(['jquery', 'jquery.terminal'], factory);
+    } else if (typeof module === 'object' && module.exports) {
+        // Node/CommonJS
+        module.exports = function(root, jQuery) {
+            if (jQuery === undefined) {
+                // require('jQuery') returns a factory that requires window to
+                // build a jQuery instance, we normalize how we use modules
+                // that require this pattern but the window provided is a noop
+                // if it's defined (how jquery works)
+                if (window !== undefined) {
+                    jQuery = require('jquery');
+                } else {
+                    jQuery = require('jquery')(root);
+                }
+            }
+            if (!jQuery.fn.terminal) {
+                if (window !== undefined) {
+                    require('jquery.terminal');
+                } else {
+                    require('jquery.terminal')(jQuery);
+                }
+            }
+            factory(jQuery);
+            return jQuery;
+        };
+    } else {
+        // Browser
+        // istanbul ignore next
+        factory(root.jQuery);
+    }
+})(function($) {
     $.extend_if_has = function(desc, source, array) {
-        for (var i=array.length;i--;) {
-            if (typeof source[array[i]] != 'undefined') {
+        for (var i = array.length; i--;) {
+            if (typeof source[array[i]] !== 'undefined') {
                 desc[array[i]] = source[array[i]];
             }
         }
         return desc;
     };
-    $.fn.dterm = function(eval, options) {
-        var op = $.extend_if_has({}, options, 
-                                   ['greetings', 'prompt', 'onInit',
-                                    'onExit', 'clear',
-                                    'login', 'name', 'exit']);
+    var defaults = Object.keys($.terminal.defaults).concat(['greetings']);
+    $.fn.dterm = function(interpreter, options) {
+        var op = $.extend_if_has({}, options, defaults);
         op.enabled = false;
-        var terminal = this.terminal(eval, op).css('overflow', 'hidden');
+        this.addClass('dterm');
+        var terminal = $('<div/>').appendTo(this).terminal(interpreter, op);
         if (!options.title) {
             options.title = 'JQuery Terminal Emulator';
         }
+        var close = options.close || $.noop;
         if (options.logoutOnClose) {
-            options.close = function(e, ui) {
+            options.close = function() {
                 terminal.logout();
                 terminal.clear();
+                close();
             };
         } else {
-            options.close = function(e, ui) {
+            options.close = function() {
                 terminal.disable();
+                close();
             };
         }
         var self = this;
-        this.dialog($.extend(options, {
-            resizeStop: function(e, ui) {
-                var content = self.find('.ui-dialog-content');
-                terminal.resize(content.width(), content.height());
-            },
-            open: function(e, ui) {
-                terminal.focus();
-                terminal.resize();
+        if (window.IntersectionObserver) {
+            var visibility_observer = new IntersectionObserver(function() {
+                if (self.is(':visible')) {
+                    terminal.focus().resize();
+                } else {
+                    terminal.disable();
+                }
+            }, {
+                root: null
+            });
+            visibility_observer.observe(terminal[0]);
+        }
+        this.dialog($.extend({}, options, {
+            open: function(event, ui) {
+                if (!window.IntersectionObserver) {
+                    setTimeout(function() {
+                        terminal.enable().resize();
+                    }, 100);
+                }
+                if (typeof options.open === 'function') {
+                    options.open(event, ui);
+                }
             },
             show: 'fade',
             closeOnEscape: false
@@ -60,4 +107,4 @@
         self.terminal = terminal;
         return self;
     };
-})(jQuery);
+});

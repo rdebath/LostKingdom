@@ -6,15 +6,24 @@
 <meta name="author" content="Jakub Jankiewicz - jcubic&#64;onet.pl"/>
 <script src="js/jquery-1.7.1.min.js"></script>
 <script src="js/jquery.mousewheel-min.js"></script>
-<script src="js/jquery.terminal-min.js"></script>
+<script src="js/jquery.terminal.min.js"></script>
 <script src="bf.js"></script>
 <link href="css/jquery.terminal.css" rel="stylesheet"/>
-<style>
-.terminal, .cmd, .terminal .terminal-output div div, .cmd .prompt {
-    font-size: 20px;
-    line-height: 24px;
+
+<style>/* Increase text size by 33% */
+.terminal,
+.terminal-output > :not(.raw) span,
+.terminal-output > :not(.raw) a,
+.terminal-output > :not(.raw) div,
+.cmd,
+.cmd span,
+.cmd div {
+    font-family: monospace;
+    font-size: 16px;
+    line-height: 20px;
 }
 </style>
+
 <script>//<!--
 var BFinputPtr = 0;
 var BFinputText = '';
@@ -90,13 +99,13 @@ jQuery(document).ready(function($) {
 
 <body class="terminal">
 <div id="bare" class="terminal-output">
-<div>BF Interpreter ...</div>
-<div></div>
-<div></div>
-<div>Please enable Javascript and cookies.</div>
+<div>Starting BF program ...<br\>
+<br\>
+<br\>
+Please enable Javascript and cookies.</div>
 </div>
     <a href="https://github.com/rdebath/LostKingdom/">
-        <img style="position: absolute; top: 0; right: 0; border: 0;"
+        <img style="position: absolute; top: 0; right: 0; border: 0; z-index: 101"
              src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png"
              alt="Fork me on GitHub"></a>
 </body>
